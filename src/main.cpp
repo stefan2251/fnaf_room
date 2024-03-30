@@ -136,9 +136,16 @@ int main() {
         return -1;
     }
 
+    Model animatronic("resources/objects/bonbon1/untitled1.obj");
+    animatronic.SetShaderTextureNamePrefix("material.");
+
+    Model fan("resources/objects/ceiling_fan/scene.gltf");
+    fan.SetShaderTextureNamePrefix("material.");
+
+    stbi_set_flip_vertically_on_load(false);
     Model ourModel("resources/objects/old_london-y_room/scene.gltf");
     ourModel.SetShaderTextureNamePrefix("material.");
-    stbi_set_flip_vertically_on_load(false);
+
 
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
 
@@ -166,15 +173,11 @@ int main() {
 
     // load models
     // -----------
-    //Model ourModel("resources/objects/backpack/backpack.obj");
-    //ourModel.SetShaderTextureNamePrefix("material.");
-    //Model ourModel("resources/objects/fnaf_plus_office/scene.gltf");
-    //ourModel.SetShaderTextureNamePrefix("material.");
 
 
 
     PointLight& pointLight = programState->pointLight;
-    pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
+    pointLight.position = glm::vec3(-1.0f, 9, -4.0);
     pointLight.ambient = glm::vec3(0.1, 0.1, 0.1);
     pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
@@ -246,6 +249,25 @@ int main() {
         model = glm::scale(model, glm::vec3(programState->Scale));    // it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
+
+        //render animatronic
+        glm::mat4 animodel = glm::mat4(1.0f);
+        animodel = glm::translate(animodel,
+                               programState->Position + glm::vec3(4,-0.5,-5)); // translate it down so it's at the center of the scene
+        animodel = glm::rotate(animodel,glm::radians(135.0f),glm::vec3(0,1,0));
+        animodel = glm::scale(animodel, glm::vec3(5.0f));    // it's a bit too big for our scene, so scale it down
+        ourShader.setMat4("model", animodel);
+        animatronic.Draw(ourShader);
+
+        //render fan
+        glm::mat4 fanmodel = glm::mat4(1.0f);
+        fanmodel = glm::translate(fanmodel,
+                                  programState->Position + glm::vec3(-1,11,-2)); // translate it down so it's at the center of the scene
+        fanmodel = glm::rotate(fanmodel,glm::radians(90.0f),glm::vec3(1,0,0));
+        fanmodel = glm::scale(fanmodel, glm::vec3(2.0f));    // it's a bit too big for our scene, so scale it down
+        ourShader.setMat4("model", fanmodel);
+        fan.Draw(ourShader);
+
 
         if (programState->ImGuiEnabled)
             DrawImGui(programState);
