@@ -27,8 +27,8 @@ void processInput(GLFWwindow *window);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
 // camera
 
@@ -57,7 +57,7 @@ struct ProgramState {
     Camera camera;
     bool CameraMouseMovementUpdateEnabled = true;
     glm::vec3 Position = glm::vec3(0.0f);
-    float Scale = 0.05f;
+    float Scale = 1.0f;
     PointLight pointLight;
     ProgramState()
             : camera(glm::vec3(0.0f, 0.0f, 3.0f)) {}
@@ -143,7 +143,7 @@ int main() {
     Model animatronic("resources/objects/bonbon1/untitled1.obj");
     animatronic.SetShaderTextureNamePrefix("material.");
 
-    Model fan("resources/objects/ceiling_fan/scene.gltf");
+    Model fan("resources/objects/ceiling_fan/untitled2.obj");
     fan.SetShaderTextureNamePrefix("material.");
 
     stbi_set_flip_vertically_on_load(false);
@@ -189,14 +189,14 @@ int main() {
 
 
     PointLight& pointLight = programState->pointLight;
-    pointLight.position = glm::vec3(-1.0f, 9, -4.0);
+    pointLight.position = glm::vec3(-1.0f, 10, -1.925);
     pointLight.ambient = glm::vec3(0.1, 0.1, 0.1);
     pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
 
-    pointLight.constant = 0.5f;
-    pointLight.linear = 0.01f;
-    pointLight.quadratic = 0.001f;
+    pointLight.constant = 0.05f;
+    pointLight.linear = 1.0f;
+    pointLight.quadratic = 0.9f;
 
     /*pointLight.position = glm::vec3(4.0f, 4.0, -3.0);
     pointLight.ambient = glm::vec3(1, 1, 1);
@@ -215,6 +215,7 @@ int main() {
 
     // render loop
     // -----------
+    int range, num;
     while (!glfwWindowShouldClose(window)) {
         // per-frame time logic
         // --------------------
@@ -226,6 +227,16 @@ int main() {
         // -----
         processInput(window);
 
+        range = 10;
+        num = rand() % range + 1;
+        if((int)currentFrame % num == 0){
+            pointLight.constant = 2;
+            pointLight.linear = 3;
+        }
+        else{
+            pointLight.constant = 0.05f;
+            pointLight.linear = 1.0f;
+        }
 
         // render
         // ------
@@ -255,28 +266,27 @@ int main() {
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model,
-                               programState->Position + glm::vec3(0,0.0,0)); // translate it down so it's at the center of the scene
+                               programState->Position + glm::vec3(0,0.0,0));
         model = glm::rotate(model,glm::radians(-90.0f),glm::vec3(1.0,0,0));
         //model = glm::rotate(model,glm::radians(-180.0f),glm::vec3(0,0,1.0));
-        model = glm::scale(model, glm::vec3(programState->Scale));    // it's a bit too big for our scene, so scale it down
+        model = glm::scale(model, glm::vec3(programState->Scale*0.05));
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
         //render animatronic
         glm::mat4 animodel = glm::mat4(1.0f);
         animodel = glm::translate(animodel,
-                               programState->Position + glm::vec3(4,-0.5,-5)); // translate it down so it's at the center of the scene
+                               programState->Position + glm::vec3(4,-0.5,-5));
         animodel = glm::rotate(animodel,glm::radians(135.0f),glm::vec3(0,1,0));
-        animodel = glm::scale(animodel, glm::vec3(5.0f));    // it's a bit too big for our scene, so scale it down
+        animodel = glm::scale(animodel, glm::vec3(programState->Scale*5.0f));
         ourShader.setMat4("model", animodel);
         animatronic.Draw(ourShader);
 
         //render fan
         glm::mat4 fanmodel = glm::mat4(1.0f);
         fanmodel = glm::translate(fanmodel,
-                                  programState->Position + glm::vec3(-1,11,-2)); // translate it down so it's at the center of the scene
-        fanmodel = glm::rotate(fanmodel,glm::radians(90.0f),glm::vec3(1,0,0));
-        fanmodel = glm::scale(fanmodel, glm::vec3(2.0f));    // it's a bit too big for our scene, so scale it down
+                                  programState->Position + glm::vec3(-1,8.9,-2)); //-1, 9.7, -2 for 0.01
+        fanmodel = glm::scale(fanmodel, glm::vec3(programState->Scale*0.015f));
         ourShader.setMat4("model", fanmodel);
         fan.Draw(ourShader);
 
@@ -367,6 +377,9 @@ void DrawImGui(ProgramState *programState) {
         ImGui::DragFloat3("Backpack position", (float*)&programState->Position);
         ImGui::DragFloat("Backpack scale", &programState->Scale, 0.05, 0.1, 4.0);
 
+        ImGui::DragFloat("pointLight.X", &programState->pointLight.position[0], 0.05, 0.0, 1.0);
+        ImGui::DragFloat("pointLight.Y", &programState->pointLight.position[1], 0.05, 0.0, 1.0);
+        ImGui::DragFloat("pointLight.Z", &programState->pointLight.position[2], 0.05, 0.0, 1.0);
         ImGui::DragFloat("pointLight.constant", &programState->pointLight.constant, 0.05, 0.0, 1.0);
         ImGui::DragFloat("pointLight.linear", &programState->pointLight.linear, 0.05, 0.0, 1.0);
         ImGui::DragFloat("pointLight.quadratic", &programState->pointLight.quadratic, 0.05, 0.0, 1.0);
