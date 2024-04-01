@@ -109,6 +109,8 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+
+
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
@@ -128,6 +130,8 @@ int main() {
     glfwSetKeyCallback(window, key_callback);
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -166,6 +170,14 @@ int main() {
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+
+    //blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    //face-culling
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     // build and compile shaders
     // -------------------------
