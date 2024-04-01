@@ -59,6 +59,5 @@ void main()
        discard;
     vec3 result = CalcPointLight(pointLight, normal, FragPos, viewDir);
 
-
     FragColor = vec4(result, 1.0);
 }
