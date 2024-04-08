@@ -51,6 +51,17 @@ struct PointLight {
     float quadratic;
 };
 
+float quadCoords[] =
+        {
+                -1.0f, 1.0f,  0.0f, 1.0f,
+                -1.0f, -1.0f,  0.0f, 0.0f,
+                1.0f,  -1.0f,  1.0f, 0.0f,
+
+                -1.0f,  1.0f,  0.0f, 1.0f,
+                1.0f, -1.0f,  1.0f, 0.0f,
+                1.0f,  1.0f,  1.0f, 1.0f
+        };
+
 struct ProgramState {
     glm::vec3 clearColor = glm::vec3(0);
     bool ImGuiEnabled = false;
@@ -140,21 +151,6 @@ int main() {
         return -1;
     }
 
-    Model animatronic("resources/objects/bonbon1/untitled1.obj");
-    animatronic.SetShaderTextureNamePrefix("material.");
-
-    Model fan("resources/objects/ceiling_fan/untitled2.obj");
-    fan.SetShaderTextureNamePrefix("material.");
-
-    Model fred("resources/objects/fred/fred.obj");
-    fred.SetShaderTextureNamePrefix("material.");
-
-    Model vase("resources/objects/vase/vase.obj");
-    vase.SetShaderTextureNamePrefix("material.");
-
-    stbi_set_flip_vertically_on_load(false);
-    Model ourModel("resources/objects/old_london-y_room/untitled3.obj");
-    ourModel.SetShaderTextureNamePrefix("material.");
 
 
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
@@ -189,9 +185,31 @@ int main() {
     // -------------------------
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
 
+    Shader frameshader("resources/shaders/framebuffer.vs", "resources/shaders/framebuffer.fs");
     // load models
     // -----------
 
+    Model animatronic("resources/objects/bonbon1/untitled1.obj");
+    animatronic.SetShaderTextureNamePrefix("material.");
+
+    Model fan("resources/objects/ceiling_fan/untitled2.obj");
+    fan.SetShaderTextureNamePrefix("material.");
+
+    Model fred("resources/objects/fred/fred.obj");
+    fred.SetShaderTextureNamePrefix("material.");
+
+    Model vase("resources/objects/vase/vase.obj");
+    vase.SetShaderTextureNamePrefix("material.");
+
+    Model ceiling("resources/objects/wall/wall.obj");
+    ceiling.SetShaderTextureNamePrefix("material.");
+
+    stbi_set_flip_vertically_on_load(false);
+    Model ourModel("resources/objects/old_london-y_room/untitled3.obj");
+    ourModel.SetShaderTextureNamePrefix("material.");
+
+    frameshader.use();
+    frameshader.setInt("screenTexture", 0);
 
 
     PointLight& pointLight = programState->pointLight;
@@ -200,9 +218,9 @@ int main() {
     pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
 
-    pointLight.constant = 0.05f;
-    pointLight.linear = 1.0f;
-    pointLight.quadratic = 0.9f;
+    pointLight.constant = 0.0f;
+    pointLight.linear = 2.0f;
+    pointLight.quadratic = 0.5f;
 
     /*pointLight.position = glm::vec3(4.0f, 4.0, -3.0);
     pointLight.ambient = glm::vec3(1, 1, 1);
@@ -218,6 +236,52 @@ int main() {
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadCoords), &quadCoords, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    //frameshader.use();
+    //frameshader.setInt("screenTexture", 0);
+
+    unsigned int fbo;
+    glGenFramebuffers(1, &fbo);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    unsigned int textureColorbuffer;
+    glGenTextures(1, &textureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0,
+                 GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                textureColorbuffer, 0);
+
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, 800, 600, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "Error framebuffer";
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // render loop
     // -----------
@@ -233,21 +297,23 @@ int main() {
         // -----
         processInput(window);
 
-        range = 10;
+        range = 20;
         num = rand() % range + 1;
         if((int)currentFrame % num == 0){
             pointLight.constant = 2;
             pointLight.linear = 3;
         }
         else{
-            pointLight.constant = 0.05f;
-            pointLight.linear = 1.0f;
+            pointLight.constant = 0.0f;
+            pointLight.linear = 2.0f;
         }
 
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glEnable(GL_DEPTH_TEST);
         // render
         // ------
         glClearColor(programState->clearColor.r, programState->clearColor.g, programState->clearColor.b, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // don't forget to enable shader before setting uniforms
         ourShader.use();
@@ -306,15 +372,23 @@ int main() {
         ourShader.setMat4("model", model);
         fred.Draw(ourShader);
 
+        //render ceiling
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                               programState->Position + glm::vec3(-8.3,12.5,-4));
+        model = glm::rotate(model,glm::radians(90.0f),glm::vec3(1,0,0.0));
+        model = glm::scale(model, glm::vec3(programState->Scale*0.2f));
+        ourShader.setMat4("model", model);
+        ceiling.Draw(ourShader);
+
         //render glass
         model = glm::mat4(1.0f);
         model = glm::translate(model,
                                programState->Position + glm::vec3(-8.3,2.7,-8));
         model = glm::scale(model, glm::vec3(programState->Scale*1.0f));
         ourShader.setMat4("model", model);
-        ourShader.setFloat("transparency", 0.7f);
+        ourShader.setFloat("transparency", 0.7f); //must be last cause of transparency
         vase.Draw(ourShader);
-
 
         if (programState->ImGuiEnabled)
             DrawImGui(programState);
@@ -323,6 +397,15 @@ int main() {
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glClear(GL_COLOR_BUFFER_BIT);
+        frameshader.use();
+        glBindVertexArray(quadVAO);
+        glDisable(GL_DEPTH_TEST);
+        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
