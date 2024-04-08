@@ -146,8 +146,14 @@ int main() {
     Model fan("resources/objects/ceiling_fan/untitled2.obj");
     fan.SetShaderTextureNamePrefix("material.");
 
+    Model fred("resources/objects/fred/fred.obj");
+    fred.SetShaderTextureNamePrefix("material.");
+
+    Model vase("resources/objects/vase/vase.obj");
+    vase.SetShaderTextureNamePrefix("material.");
+
     stbi_set_flip_vertically_on_load(false);
-    Model ourModel("resources/objects/old_london-y_room/scene.gltf");
+    Model ourModel("resources/objects/old_london-y_room/untitled3.obj");
     ourModel.SetShaderTextureNamePrefix("material.");
 
 
@@ -256,6 +262,7 @@ int main() {
         ourShader.setFloat("pointLight.quadratic", pointLight.quadratic);
         ourShader.setVec3("viewPosition", programState->camera.Position);
         ourShader.setFloat("material.shininess", 32.0f);
+        ourShader.setFloat("transparency", 1.0f);
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom),
                                                 (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
@@ -267,28 +274,46 @@ int main() {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model,
                                programState->Position + glm::vec3(0,0.0,0));
-        model = glm::rotate(model,glm::radians(-90.0f),glm::vec3(1.0,0,0));
+        //model = glm::rotate(model,glm::radians(-90.0f),glm::vec3(1.0,0,0));
         //model = glm::rotate(model,glm::radians(-180.0f),glm::vec3(0,0,1.0));
         model = glm::scale(model, glm::vec3(programState->Scale*0.05));
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
         //render animatronic
-        glm::mat4 animodel = glm::mat4(1.0f);
-        animodel = glm::translate(animodel,
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
                                programState->Position + glm::vec3(4,-0.5,-5));
-        animodel = glm::rotate(animodel,glm::radians(135.0f),glm::vec3(0,1,0));
-        animodel = glm::scale(animodel, glm::vec3(programState->Scale*5.0f));
-        ourShader.setMat4("model", animodel);
+        model = glm::rotate(model,glm::radians(135.0f),glm::vec3(0,1,0));
+        model = glm::scale(model, glm::vec3(programState->Scale*5.0f));
+        ourShader.setMat4("model", model);
         animatronic.Draw(ourShader);
 
         //render fan
-        glm::mat4 fanmodel = glm::mat4(1.0f);
-        fanmodel = glm::translate(fanmodel,
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
                                   programState->Position + glm::vec3(-1,8.9,-2)); //-1, 9.7, -2 for 0.01
-        fanmodel = glm::scale(fanmodel, glm::vec3(programState->Scale*0.015f));
-        ourShader.setMat4("model", fanmodel);
+        model = glm::scale(model, glm::vec3(programState->Scale*0.015f));
+        ourShader.setMat4("model", model);
         fan.Draw(ourShader);
+
+        //render fred
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                               programState->Position + glm::vec3(6,3.3,-6));
+        model = glm::rotate(model,glm::radians(180.0f),glm::vec3(0,1,0));
+        model = glm::scale(model, glm::vec3(programState->Scale*0.5f));
+        ourShader.setMat4("model", model);
+        fred.Draw(ourShader);
+
+        //render glass
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                               programState->Position + glm::vec3(-8.3,2.7,-8));
+        model = glm::scale(model, glm::vec3(programState->Scale*1.0f));
+        ourShader.setMat4("model", model);
+        ourShader.setFloat("transparency", 0.7f);
+        vase.Draw(ourShader);
 
 
         if (programState->ImGuiEnabled)

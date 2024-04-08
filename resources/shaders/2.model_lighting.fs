@@ -25,6 +25,7 @@ in vec3 FragPos;
 
 uniform PointLight pointLight;
 uniform Material material;
+uniform float transparency;
 
 uniform vec3 viewPosition;
 // calculates the color when using a point light.
@@ -60,5 +61,5 @@ void main()
     vec3 result = CalcPointLight(pointLight, normal, FragPos, viewDir);
 
 
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(result, transparency);
 }

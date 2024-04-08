@@ -1,0 +1,342 @@
+# Blender 4.1.0 MTL File: 'None'
+# www.blender.org
+
+newmtl PxrDisney6SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/PxrDisney6SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/PxrDisney6SG_normal.png
+
+newmtl PxrDisney7SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/PxrDisney7SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/PxrDisney7SG_normal.png
+
+newmtl blinn1SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/blinn1SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/blinn1SG_normal.png
+
+newmtl blinn2SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/blinn2SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/blinn2SG_normal.png
+
+newmtl blinn3SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/blinn3SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/blinn3SG_normal.png
+
+newmtl blinn4SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/blinn4SG_baseColor.png
+
+newmtl initialShadingGroup
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/initialShadingGroup_baseColor.png
+map_Bump -bm 1.000000 ./textures/initialShadingGroup_normal.png
+
+newmtl lambert10SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert10SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert10SG_normal.png
+
+newmtl lambert17SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert17SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert17SG_normal.png
+
+newmtl lambert19SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert19SG_baseColor.png
+map_Bump -bm 0.250997 ./textures/lambert19SG_normal.png
+
+newmtl lambert25SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert25SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert25SG_normal.png
+
+newmtl lambert26SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert26SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert26SG_normal.png
+
+newmtl lambert27SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert27SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert27SG_normal.png
+
+newmtl lambert28SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert28SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert28SG_normal.png
+
+newmtl lambert29SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert29SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert29SG_normal.png
+
+newmtl lambert30SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert30SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert30SG_normal.png
+
+newmtl lambert31SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert31SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert31SG_normal.png
+
+newmtl lambert32SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert32SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert32SG_normal.png
+
+newmtl lambert33SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert33SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert33SG_normal.png
+
+newmtl lambert34SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert34SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert34SG_normal.png
+
+newmtl lambert35SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert35SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert35SG_normal.png
+
+newmtl lambert36SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert36SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert36SG_normal.png
+
+newmtl lambert37SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert37SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert37SG_normal.png
+
+newmtl lambert38SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert38SG_baseColor.png
+map_Bump -bm 0.299639 ./textures/lambert38SG_normal.png
+
+newmtl lambert39SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert39SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert39SG_normal.png
+
+newmtl lambert40SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert40SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert40SG_normal.png
+
+newmtl lambert41SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert19SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert19SG_normal.png
+
+newmtl lambert42SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert19SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert19SG_normal.png
+
+newmtl lambert43SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert43SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert43SG_normal.png
+
+newmtl lambert44SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert44SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert44SG_normal.png
+
+newmtl lambert9SG
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ./textures/lambert9SG_baseColor.png
+map_Bump -bm 1.000000 ./textures/lambert9SG_normal.png
