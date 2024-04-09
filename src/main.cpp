@@ -26,8 +26,10 @@ void processInput(GLFWwindow *window);
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
+void renderCube();
+
 // settings
-const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_WIDTH = 1850;
 const unsigned int SCR_HEIGHT = 900;
 
 // camera
@@ -184,7 +186,7 @@ int main() {
     // build and compile shaders
     // -------------------------
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
-
+    Shader simpleDepthShader("resources/shaders/3.2.2.point_shadows_depth.vs", "resources/shaders/3.2.2.point_shadows_depth.fs", "resources/shaders/3.2.2.point_shadows_depth.gs");
     Shader frameshader("resources/shaders/framebuffer.vs", "resources/shaders/framebuffer.fs");
     // load models
     // -----------
@@ -213,25 +215,35 @@ int main() {
 
 
     PointLight& pointLight = programState->pointLight;
-    pointLight.position = glm::vec3(-1.0f, 10, -1.925);
+    pointLight.position = glm::vec3(-1.0f, 9, -1.925);
     pointLight.ambient = glm::vec3(0.1, 0.1, 0.1);
     pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
     pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
 
-    pointLight.constant = 0.0f;
-    pointLight.linear = 2.0f;
+    pointLight.constant = 0.03f;
+    pointLight.linear = 0.5f;
     pointLight.quadratic = 0.5f;
 
-    /*pointLight.position = glm::vec3(4.0f, 4.0, -3.0);
-    pointLight.ambient = glm::vec3(1, 1, 1);
-    pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
-    pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
-
-    pointLight.constant = 1.0f;
-    pointLight.linear = 0.09f;
-    pointLight.quadratic = 0.032f;*/
-
-
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    // create depth cubemap texture
+    unsigned int depthCubemap;
+    glGenTextures(1, &depthCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
     // draw in wireframe
@@ -247,8 +259,6 @@ int main() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-    //frameshader.use();
-    //frameshader.setInt("screenTexture", 0);
 
     unsigned int fbo;
     glGenFramebuffers(1, &fbo);
@@ -283,9 +293,15 @@ int main() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    ourShader.use();
+    ourShader.setInt("material.texture_diffuse1", 0);
+    ourShader.setInt("material.texture_specular1", 1);
+    ourShader.setInt("depthMap", 2);
     // render loop
     // -----------
     int range, num;
+    glm::vec3 lightPos = pointLight.position;
+
     while (!glfwWindowShouldClose(window)) {
         // per-frame time logic
         // --------------------
@@ -297,6 +313,9 @@ int main() {
         // -----
         processInput(window);
 
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         range = 20;
         num = rand() % range + 1;
         if((int)currentFrame % num == 0){
@@ -304,9 +323,121 @@ int main() {
             pointLight.linear = 3;
         }
         else{
-            pointLight.constant = 0.0f;
-            pointLight.linear = 2.0f;
+            pointLight.constant = 0.03f;
+            pointLight.linear = 0.5f;
         }
+
+        float near_plane = 1.0f;
+        float far_plane = 25.0f;
+        glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
+        std::vector<glm::mat4> shadowTransforms;
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glEnable(GL_DEPTH_TEST);
+        // render
+        // ------
+        glClearColor(programState->clearColor.r, programState->clearColor.g, programState->clearColor.b, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        // 1. render scene to depth cubemap
+        // --------------------------------
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        simpleDepthShader.use();
+        for (unsigned int i = 0; i < 6; ++i)
+            simpleDepthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+        simpleDepthShader.setFloat("far_plane", far_plane);
+        simpleDepthShader.setVec3("lightPos", lightPos);
+
+
+        // render the loaded model
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                               programState->Position + glm::vec3(0,0.0,0));
+        model = glm::scale(model, glm::vec3(programState->Scale*0.05));
+        simpleDepthShader.setMat4("model", model);
+        ourModel.Draw(simpleDepthShader);
+
+        //render animatronic
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                               programState->Position + glm::vec3(4,-0.5,-5));
+        model = glm::rotate(model,glm::radians(135.0f),glm::vec3(0,1,0));
+        model = glm::scale(model, glm::vec3(programState->Scale*5.0f));
+        simpleDepthShader.setMat4("model", model);
+        animatronic.Draw(simpleDepthShader);
+
+        //render fan
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                                  programState->Position + glm::vec3(-1,8.9,-2)); //-1, 9.7, -2 for 0.01
+        model = glm::scale(model, glm::vec3(programState->Scale*0.015f));
+        simpleDepthShader.setMat4("model", model);
+        fan.Draw(simpleDepthShader);
+
+        //render fred
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                               programState->Position + glm::vec3(6,3.3,-6));
+        model = glm::rotate(model,glm::radians(180.0f),glm::vec3(0,1,0));
+        model = glm::scale(model, glm::vec3(programState->Scale*0.5f));
+        simpleDepthShader.setMat4("model", model);
+        fred.Draw(simpleDepthShader);
+
+        //render ceiling
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                               programState->Position + glm::vec3(-8.3,12.5,-4));
+        model = glm::rotate(model,glm::radians(90.0f),glm::vec3(1,0,0.0));
+        model = glm::scale(model, glm::vec3(programState->Scale*0.2f));
+        simpleDepthShader.setMat4("model", model);
+        ceiling.Draw(simpleDepthShader);
+
+        //render glass
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                               programState->Position + glm::vec3(-8.3,2.7,-8));
+        model = glm::scale(model, glm::vec3(programState->Scale*1.0f));
+        simpleDepthShader.setMat4("model", model); //must be last cause of transparency
+        vase.Draw(simpleDepthShader);
+
+        //render object to fix
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                               programState->Position + glm::vec3(-8.3,50,-8));
+        model = glm::scale(model, glm::vec3(programState->Scale*1.0f));
+        ourShader.setMat4("model", model);
+        vase.Draw(ourShader);
+
+        renderCube();
+        glBindFramebuffer(GL_FRAMEBUFFER, 1);
+
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // -------------------------------------------------------------------------------
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        //render again
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        /*range = 20;
+        num = rand() % range + 1;
+        if((int)currentFrame % num == 0){
+            pointLight.constant = 2;
+            pointLight.linear = 3;
+        }
+        else{
+            pointLight.constant = 0.03f;
+            pointLight.linear = 0.05f;
+        }*/
 
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glEnable(GL_DEPTH_TEST);
@@ -329,7 +460,12 @@ int main() {
         ourShader.setVec3("viewPosition", programState->camera.Position);
         ourShader.setFloat("material.shininess", 32.0f);
         ourShader.setFloat("transparency", 1.0f);
-        // view/projection transformations
+        ourShader.setFloat("far_plane", far_plane);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+
+        // view/projection transformation
         glm::mat4 projection = glm::perspective(glm::radians(programState->camera.Zoom),
                                                 (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = programState->camera.GetViewMatrix();
@@ -337,11 +473,9 @@ int main() {
         ourShader.setMat4("view", view);
 
         // render the loaded model
-        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::mat4(1.0f);
         model = glm::translate(model,
                                programState->Position + glm::vec3(0,0.0,0));
-        //model = glm::rotate(model,glm::radians(-90.0f),glm::vec3(1.0,0,0));
-        //model = glm::rotate(model,glm::radians(-180.0f),glm::vec3(0,0,1.0));
         model = glm::scale(model, glm::vec3(programState->Scale*0.05));
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
@@ -358,7 +492,7 @@ int main() {
         //render fan
         model = glm::mat4(1.0f);
         model = glm::translate(model,
-                                  programState->Position + glm::vec3(-1,8.9,-2)); //-1, 9.7, -2 for 0.01
+                               programState->Position + glm::vec3(-1,8.9,-2)); //-1, 9.7, -2 for 0.01
         model = glm::scale(model, glm::vec3(programState->Scale*0.015f));
         ourShader.setMat4("model", model);
         fan.Draw(ourShader);
@@ -381,30 +515,37 @@ int main() {
         ourShader.setMat4("model", model);
         ceiling.Draw(ourShader);
 
+        //renderCube();
         //render glass
         model = glm::mat4(1.0f);
         model = glm::translate(model,
                                programState->Position + glm::vec3(-8.3,2.7,-8));
         model = glm::scale(model, glm::vec3(programState->Scale*1.0f));
         ourShader.setMat4("model", model);
-        ourShader.setFloat("transparency", 0.7f); //must be last cause of transparency
+        ourShader.setFloat("transparency", 0.6f); //must be last cause of transparency
         vase.Draw(ourShader);
 
-        if (programState->ImGuiEnabled)
-            DrawImGui(programState);
+        //render object to fix
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,
+                               programState->Position + glm::vec3(-8.3,50,-8));
+        model = glm::scale(model, glm::vec3(programState->Scale*1.0f));
+        ourShader.setMat4("model", model);
+        vase.Draw(ourShader);
 
+        renderCube();
 
-
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
         glClear(GL_COLOR_BUFFER_BIT);
         frameshader.use();
         glBindVertexArray(quadVAO);
         glDisable(GL_DEPTH_TEST);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+        if (programState->ImGuiEnabled)
+            DrawImGui(programState);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -518,4 +659,76 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
+}
+unsigned int cubeVAO = 0;
+unsigned int cubeVBO = 0;
+void renderCube()
+{
+    // initialize (if necessary)
+    if (cubeVAO == 0)
+    {
+        float vertices[] = {
+                // back face
+                -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+                1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
+                1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+                -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+                -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+                // front face
+                -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+                1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+                1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+                1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+                -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+                -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+                // left face
+                -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+                -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+                -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+                -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+                -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+                -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+                // right face
+                1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+                1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+                1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+                1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+                1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left
+                // bottom face
+                -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+                1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+                1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+                1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+                -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+                -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+                // top face
+                -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+                1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+                1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right
+                1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+                -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+                -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left
+        };
+        glGenVertexArrays(1, &cubeVAO);
+        glGenBuffers(1, &cubeVBO);
+        // fill buffer
+        glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        // link vertex attributes
+        glBindVertexArray(cubeVAO);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+    // render Cube
+    glBindVertexArray(cubeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
 }

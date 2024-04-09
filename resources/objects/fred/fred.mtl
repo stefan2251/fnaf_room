@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 3
-map_Bump -bm 1.000000 ./textures/M_A_GFPlush.001_normal.png
+map_bump -bm 1.000000 ./textures/M_A_GFPlush.001_normal.png
 
 newmtl MM_AnimatronicCupcake1.001
 Ns 5.893433
@@ -31,7 +31,7 @@ Ni 1.500000
 d 1.000000
 illum 1
 map_Kd ./textures/M_A_GFPlush.001_baseColor.png
-map_Bump -bm 1.000000 ./textures/M_A_GFPlush.001_normal.png
+map_bump -bm 1.000000 ./textures/M_A_GFPlush.001_normal.png
 
 newmtl WorldGridMaterial.001
 Ns 9.140376
