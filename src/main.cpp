@@ -29,8 +29,8 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
 void renderCube();
 
 // settings
-const unsigned int SCR_WIDTH = 1850;
-const unsigned int SCR_HEIGHT = 900;
+unsigned int SCR_WIDTH = 1600;
+unsigned int SCR_HEIGHT = 900;
 
 // camera
 
@@ -379,6 +379,7 @@ int main() {
         model = glm::mat4(1.0f);
         model = glm::translate(model,
                                   programState->Position + glm::vec3(-1,8.9,-2)); //-1, 9.7, -2 for 0.01
+        model = glm::rotate(model,glm::radians(30*currentFrame),glm::vec3(0,1,0));
         model = glm::scale(model, glm::vec3(programState->Scale*0.015f));
         simpleDepthShader.setMat4("model", model);
         fan.Draw(simpleDepthShader);
@@ -493,6 +494,7 @@ int main() {
         model = glm::mat4(1.0f);
         model = glm::translate(model,
                                programState->Position + glm::vec3(-1,8.9,-2)); //-1, 9.7, -2 for 0.01
+        model = glm::rotate(model,glm::radians(30*currentFrame),glm::vec3(0,1,0));
         model = glm::scale(model, glm::vec3(programState->Scale*0.015f));
         ourShader.setMat4("model", model);
         fan.Draw(ourShader);
@@ -583,7 +585,9 @@ void processInput(GLFWwindow *window) {
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
+    //glViewport(0, 0, width, height);
+    SCR_HEIGHT = height;
+    SCR_WIDTH = width;
 }
 
 // glfw: whenever the mouse moves, this callback is called
